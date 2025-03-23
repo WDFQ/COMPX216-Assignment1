@@ -1,6 +1,7 @@
 from time import time
 from search import *
 from assignment1aux import *
+from heapq import *
 
 def read_initial_state_from_file(filename):
     # Task 1
@@ -187,38 +188,26 @@ def astar_heuristic_cost(node):
     row_counter = 0
     col_counter = 0
 
-    #checks if the width is less than the height
-    if(width < height):
-        
-        #loops through the 2d array to check for empty spaces
-        for x in range(width):
-            for y in range(height):
-                #if the current column has empty space add to counter and skip to next column
-                if map[y][x] == "":
-                    col_counter += 1
-                    break
-
-        
-        return col_counter
-
-    #checks if the height is less than the width
-    elif(height <= width):
+   #loops through the 2d array to check for empty spaces
+    for x in range(width):
         for y in range(height):
+            #if the current column has empty space add to counter and skip to next column
+            if map[y][x] == "":
+                col_counter += 1
+                break
+
+   
+    for y in range(height):
             for x in range(width):
                 #if the current row has empty space add to counter and skip to next row
                 if map[y][x] == "":
                     row_counter += 1
                     break
-        
-        return row_counter
-
-
-        
-
-
     
-
-
+    if(row_counter > col_counter):
+        return col_counter
+    else:
+        return row_counter
 
 
 def beam_search(problem, f, beam_width): 
@@ -228,26 +217,17 @@ def beam_search(problem, f, beam_width):
     # Experiment with the beam width in the test code to find a solution.
     # Replace the line below with your code.
     display = False
-
-
     
     f = memoize(f, 'f')
     node = Node(problem.initial)
     frontier = PriorityQueue('min', f)
-
     
 
     frontier.append(node)
 
-    while len(frontier.heap) > 50:
-        frontier.pop()  # Removes the highest priority element (min or max based on order)
+    if frontier.heap.__len__() > beam_width:
+        frontier.heap = nsmallest(beam_width, frontier.heap)
     
-
-
-
-
-
-
     explored = set()
     while frontier:
         node = frontier.pop()
@@ -270,12 +250,12 @@ if __name__ == "__main__":
     # Task 1 test code
     
     print('The loaded initial state is visualised below.')
-    visualise(read_initial_state_from_file('C:/Users/jaras/OneDrive - The University of Waikato/Programming/COMPX216/aima-python/aima-python/assignment1config.txt'))
+    visualise(read_initial_state_from_file('C:/Users/jaras/OneDrive - The University of Waikato/Programming/COMPX216/aima-python/aima-python/assignment1config2.txt'))
     
 
     # Task 2 test code
     
-    garden = ZenPuzzleGarden('C:/Users/jaras/OneDrive - The University of Waikato/Programming/COMPX216/aima-python/aima-python/assignment1config.txt')
+    garden = ZenPuzzleGarden('C:/Users/jaras/OneDrive - The University of Waikato/Programming/COMPX216/aima-python/aima-python/assignment1config2.txt')
     print('Running breadth-first graph search.')
     before_time = time()
     node = breadth_first_graph_search(garden)
