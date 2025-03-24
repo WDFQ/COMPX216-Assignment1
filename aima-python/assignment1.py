@@ -204,6 +204,7 @@ def astar_heuristic_cost(node):
                     row_counter += 1
                     break
     
+    #return the smallest counter value
     if(row_counter > col_counter):
         return col_counter
     else:
@@ -216,18 +217,13 @@ def beam_search(problem, f, beam_width):
     # Return a search node containing a solved state.
     # Experiment with the beam width in the test code to find a solution.
     # Replace the line below with your code.
-    display = False
+    display = True
     
     f = memoize(f, 'f')
     node = Node(problem.initial)
     frontier = PriorityQueue('min', f)
-    
 
     frontier.append(node)
-
-    if frontier.heap.__len__() > beam_width:
-        frontier.heap = nsmallest(beam_width, frontier.heap)
-    
     explored = set()
     while frontier:
         node = frontier.pop()
@@ -243,7 +239,14 @@ def beam_search(problem, f, beam_width):
                 if f(child) < frontier[child]:
                     del frontier[child]
                     frontier.append(child)
+        # Get the smallest values that the beam width gives in the frontier
+        if len(frontier) > beam_width:
+            frontier.heap = heapq.nsmallest(beam_width, frontier.heap, key=lambda x: x[0])
+
+        
     return None
+
+
 
 if __name__ == "__main__":
 
