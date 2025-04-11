@@ -111,9 +111,9 @@ sa_schedule = exp_schedule(k=100, lam=1, limit=100)
 
 # Task 3
 # Configure parameters for the genetic algorithm.
-pop_size = None
-num_gen = 1000
-mutation_prob = 0.1
+pop_size = 13 #population size (bigger = better exploration but slower)
+num_gen = 200 #no of generations (bigger = more runs)
+mutation_prob = 0.15 #probablity of mutation per individual (randomness)
 
 def local_beam_search(problem, population):
     # Task 4
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     
 
     # Task 3 test code
-    '''
+    
     run = 0
     method = 'genetic algorithm'
     while True:
@@ -190,7 +190,7 @@ if __name__ == '__main__':
         run += 1
     print(f'{method} run {run}: solution found')
     visualise(network.tiles, state)
-    '''
+    
 
     # Task 4 test code
     '''
