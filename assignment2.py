@@ -121,7 +121,45 @@ def local_beam_search(problem, population):
     # Return a goal state if found in the population.
     # Return the fittest state in the population if the next population contains no fitter state.
     # Replace the line below with your code.
-    raise NotImplementedError
+
+    #initialise current parent population
+    parent_population = population  
+    #beam width is size of initial population
+    beam_width = len(population)
+
+    while True:
+        #initialise the next population
+        children_population = []
+        #for every tile in the board 
+        for parent in parent_population:
+            for action in problem.actions(parent):
+                #get the child and add child into the children list
+                child = problem.result(parent, action)
+                children_population.append(child)
+        
+        #sort child from most fit to least fit
+        children_population.sort(key=problem.value, reverse=True)
+        #keep the b fittest children
+        children_population = children_population[:beam_width]
+
+        #return the state if a goal is found in the child list
+        for state in children_population:
+            if problem.goal_test(state):
+                return state
+        
+        #gets the fittest of both parent and child generations            
+        fittest_current = max(parent_population, key=problem.value)
+        fittest_next = max(children_population, key=problem.value)
+
+        #if next generation's fittest is worse or equal to current generation's fittest, return current generations fittest
+        if problem.value(fittest_next) <= problem.value(fittest_current):
+            return fittest_current
+        
+        #update the next generation to be the current child population
+        parent_population = children_population
+        
+
+
 
 def stochastic_beam_search(problem, population, limit=1000):
     # Task 5
@@ -130,6 +168,11 @@ def stochastic_beam_search(problem, population, limit=1000):
     # Return the fittest state in the population if the generation limit is reached.
     # Replace the line below with your code.
     raise NotImplementedError
+    
+
+
+
+
 
 if __name__ == '__main__':
 
@@ -193,7 +236,7 @@ if __name__ == '__main__':
     
 
     # Task 4 test code
-    '''
+    
     run = 0
     method = 'local beam search'
     while True:
@@ -210,7 +253,7 @@ if __name__ == '__main__':
         run += 1
     print(f'{method} run {run}: solution found')
     visualise(network.tiles, state)
-    '''
+    
 
     # Task 5 test code
     '''
