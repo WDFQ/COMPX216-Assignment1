@@ -111,8 +111,8 @@ sa_schedule = exp_schedule(k=100, lam=1, limit=100)
 
 # Task 3
 # Configure parameters for the genetic algorithm.
-pop_size = 13 #population size (bigger = better exploration but slower)
-num_gen = 200 #no of generations (bigger = more runs)
+pop_size = 15 #population size (bigger = better exploration but slower)
+num_gen = 300 #no of generations (bigger = more runs)
 mutation_prob = 0.15 #probablity of mutation per individual (randomness)
 
 def local_beam_search(problem, population):
@@ -126,6 +126,13 @@ def local_beam_search(problem, population):
     parent_population = population  
     #beam width is size of initial population
     beam_width = len(population)
+    #gets the fittest of parent generation           
+    fittest_current = max(parent_population, key=problem.value)
+
+    #check to see if the initial population contains a solution
+    for state in parent_population:
+        if problem.goal_test(state):
+            return state
 
     while True:
         #initialise the next population
@@ -136,6 +143,10 @@ def local_beam_search(problem, population):
                 #get the child and add child into the children list
                 child = problem.result(parent, action)
                 children_population.append(child)
+
+        #return best fittest parent if theres no children population
+        if not children_population:
+            return fittest_current
         
         #sort child from most fit to least fit
         children_population.sort(key=problem.value, reverse=True)
@@ -147,8 +158,7 @@ def local_beam_search(problem, population):
             if problem.goal_test(state):
                 return state
         
-        #gets the fittest of both parent and child generations            
-        fittest_current = max(parent_population, key=problem.value)
+        #gets the fittest of child generation  
         fittest_next = max(children_population, key=problem.value)
 
         #if next generation's fittest is worse or equal to current generation's fittest, return current generations fittest
@@ -161,7 +171,7 @@ def local_beam_search(problem, population):
 
 
 
-def stochastic_beam_search(problem, population, limit=1000):
+def stochastic_beam_search(problem, population, limit=500):
     # Task 5
     # Implement stochastic beam search.
     # Return a goal state if found in the population.
@@ -172,6 +182,11 @@ def stochastic_beam_search(problem, population, limit=1000):
     parent_population = population  
     #beam width is size of initial population
     beam_width = len(population)
+
+    #return the state if a goal is found in the parent list
+    for state in parent_population:
+        if problem.goal_test(state):
+            return state
 
     for i in range(limit):
         #initialise the next population
@@ -184,52 +199,38 @@ def stochastic_beam_search(problem, population, limit=1000):
                 child = problem.result(parent, action)
                 children_population.append(child)
 
-        #gets the fittest of both parent and child generations            
-        fittest_current = max(parent_population, key=problem.value)
-        fittest_next = max(children_population, key=problem.value)
-
-        #return the state if a goal is found in the parent list
-        for state in parent_population:
-            if problem.goal_test(state):
-                return state
-
         #return the state if a goal is found in the child list
         for state in children_population:
             if problem.goal_test(state):
                 return state
         
-        #if next generation's fittest is worse or equal to current generation's fittest, return current generations fittest
-        if problem.value(fittest_next) <= problem.value(fittest_current):
-            return fittest_current
-        else:
-            #sum of all fitness in the current generation
-            fitness_sum = 0
-            #list of all probability for each child
-            prob_list = []
+        #sum of all fitness in the current generation
+        fitness_sum = 0
+        #list of all probability for each child
+        prob_list = []
+        #initialises the list that stores all the indexes in the child population
+        index_list = []
+        iteration_counter = 0
+        #gets the sum of all fitness
+        for state in children_population:
+            fitness_sum = problem.value(state) + fitness_sum
+            index_list.append(iteration_counter)
+            iteration_counter = iteration_counter + 1
+    
+        #gathers the probability for each children and put it into the list
+        for state in children_population:
+            prob_list.append(problem.value(state)/fitness_sum)
 
-            index_list = []
-            iterationCounter = 0
-            #gets the sum of all fitness
-            for state in children_population:
-                fitness_sum = problem.value(state) + fitness_sum
-                index_list.append(iterationCounter)
-                iterationCounter = iterationCounter + 1
-        
-            #gathers the probability for each children and put it into the list
-            for state in children_population:
-                prob_list.append(problem.value(state)/fitness_sum)
+        #keep the b fittest via their probability. Note: False means no duplicates
+        selected_children_indexes = np.random.choice(index_list, beam_width, False, prob_list)
 
-            #keep the b fittest via their probability
-            selected_children_indexes = np.random.choice(index_list, beam_width, False, prob_list)
-
-            #create the list and stores the selected children to expand
-            selected_children = []
-            for index in selected_children_indexes:
-                selected_children.append(children_population[index])
-        
-            #update the next generation to be the current child population
-            parent_population = selected_children
-
+        #create the list and stores the selected children to expand
+        selected_children = []
+        for index in selected_children_indexes:
+            selected_children.append(children_population[index])
+    
+        #update the next generation to be the current child population
+        parent_population = selected_children
 
 
 if __name__ == '__main__':
