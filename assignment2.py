@@ -167,10 +167,68 @@ def stochastic_beam_search(problem, population, limit=1000):
     # Return a goal state if found in the population.
     # Return the fittest state in the population if the generation limit is reached.
     # Replace the line below with your code.
-    raise NotImplementedError
-    
 
+    #initialise current parent population
+    parent_population = population  
+    #beam width is size of initial population
+    beam_width = len(population)
 
+    for i in range(limit):
+        #initialise the next population
+        children_population = []
+
+        #for every tile in the board 
+        for parent in parent_population:
+            for action in problem.actions(parent):
+                #get the child and add child into the children list
+                child = problem.result(parent, action)
+                children_population.append(child)
+
+        #gets the fittest of both parent and child generations            
+        fittest_current = max(parent_population, key=problem.value)
+        fittest_next = max(children_population, key=problem.value)
+
+        #return the state if a goal is found in the parent list
+        for state in parent_population:
+            if problem.goal_test(state):
+                return state
+
+        #return the state if a goal is found in the child list
+        for state in children_population:
+            if problem.goal_test(state):
+                return state
+        
+        #if next generation's fittest is worse or equal to current generation's fittest, return current generations fittest
+        if problem.value(fittest_next) <= problem.value(fittest_current):
+            return fittest_current
+        else:
+            #sum of all fitness in the current generation
+            fitness_sum = 0
+            #list of all probability for each child
+            prob_list = []
+
+            index_list = []
+            iterationCounter = 0
+            #gets the sum of all fitness
+            for state in children_population:
+                fitness_sum = problem.value(state) + fitness_sum
+                index_list.append(iterationCounter)
+                iterationCounter = iterationCounter + 1
+        
+            #gathers the probability for each children and put it into the list
+            for state in children_population:
+                prob_list.append(problem.value(state)/fitness_sum)
+
+            #keep the b fittest via their probability
+            selected_children_indexes = np.random.choice(index_list, beam_width, False, prob_list)
+
+            #create the list and stores the selected children to expand
+            selected_children = []
+            for index in selected_children_indexes:
+                selected_children.append(children_population[index])
+        
+            #update the next generation to be the current child population
+            parent_population = selected_children
 
 
 
@@ -256,7 +314,7 @@ if __name__ == '__main__':
     
 
     # Task 5 test code
-    '''
+    
     run = 0
     method = 'stochastic beam search'
     while True:
@@ -273,5 +331,5 @@ if __name__ == '__main__':
         run += 1
     print(f'{method} run {run}: solution found')
     visualise(network.tiles, state)
-    '''
+    
  
