@@ -96,7 +96,6 @@ class KNetWalk(Problem):
                     if 3 in map_list[i][j] and 1 in map_list[i + 1][j]:
                         fitness += 1
                 
-                
         return fitness
      
 
